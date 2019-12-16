@@ -1,0 +1,253 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  pre .latex { border:3px solid red ; }
+</style>
+<html>
+	<head>
+		<title>Balthazar Donon - PhD student @ LRI and RTE R&D</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+								<header id="header">
+									<a href="index.html" class="logo"><strong>Balthazar Donon</strong> PhD student</a>
+									
+								</header>
+
+							<!-- Content -->
+								<section>
+									<header class="main">
+										<h1>Introducing the Graph Neural Solver</h1>
+									</header>
+
+									<h2>Overview</h2>
+
+										<p>
+											In order to introduce our approach called "Graph Neural Solver", we will see how it works on a very simple and visual case : a linear system. This novel approach aims at solving a system of linear or non-linear equations that rely on a quite sparse graphical structure. Moreover, it relies on tools from the statistical learning domain, which implies that we will learn to solve a problem in a specific input domain, and lose the genericity of classical approaches. The present blog post aims at providing intuitions about the way it works, and the typical application setup of such an approach.
+										</p>
+
+										<p>
+											One should keep in mind that using such a complex neural network algorithm is indeed a bit "overkill" for this task. As will be descibed hereafter, a simple matrix inversion provides a solution. However, our method shows its real interest when applied to much larger or more complex problems, and the following application only serves as an illustration. This approach has been developped during my first year of PhD at RTE and LRI (see <a href="https://hal.archives-ouvertes.fr/hal-02175989/">Graph Neural Solver for Power Systems</a> and <a href="https://hal.archives-ouvertes.fr/hal-02372741v1/">Neural Network for Power Flow: Graph Neural Solver</a>). Although this has been developped primarily to deal with power systems issues, I apply it to a more generic problem in the current post. 
+										</p>
+
+										<p>
+											The code developped for this blog post is available on my GitHub, feel free to take a look. If you have any question or observation, write me at <a href="mailto:balthazar.donon@rte-france.com">balthazar.donon@rte-france.com</a>. 
+										</p>
+
+									<h2>Problem definition</h2>
+
+										<p>
+											Many real-world problems rely on complex graphical structures: electricity transportation, roads, social interactions, finite-volume systems, etc. In each of these, we have a set of fundamental entities (nodes, or particles), who interact through fundamental interactions. Not every pair of nodes are directly interconnected, but they may be linked through some other nodes. One may want to develop a way to predict the behavior of these system in order to control them. For instance, in the electricity transportation network, consumers and producers are interconnected through power lines. Depending on how much power is being inputed or outputed in the grid, and where, it can cause some congestion. In order to prevent these events, people that manage the power transportation network, need to be able to accurately determine if there will be a congestion in the future, based on the consumption predictions. This means that they need a good model of the power grid.
+										</p>
+
+										<p>
+											Our proposed approach is a neural network architecture that exploits the graphical structure of the problem. It relies heavily on Graph Neural Networks ADD REF.
+										</p>
+
+										<p>
+											For now, let's focus on a quite simple problem : a set of interacting particles that move in a 2D plane, and that are linked through a set of springs. We have a set of \(N\) particles, each defined by its 2-dimensional coordinates \( \overrightarrow{x}_i = (x_i, y_i) \). Some particles are linked to others through a spring-like interaction.
+										</p>
+
+										<center><img src="images/gns_linear_system_article/basic_interaction.png" height="200" alt="" /></center>
+
+										<p>
+											The forces have the following expressions: 
+										</p>
+
+										<p>
+											\[ \overrightarrow{F}_{i \rightarrow j} = k_{ij} (\overrightarrow{x}_i - \overrightarrow{x}_j) \] 
+											\[ \overrightarrow{F}_{j \rightarrow i} = k_{ij} (\overrightarrow{x}_j - \overrightarrow{x}_i) \]
+										</p>
+
+										<p>
+											In addition to the interaction forces applied to each particle, there are external forces \( \overrightarrow{F}_{ext \rightarrow i}\). A particle \(i\) is at an equilibrium if : 
+											\[ \overrightarrow{F}_{ext \rightarrow i} + \sum_{j\in\mathcal{N}(i)} \overrightarrow{F}_{j \rightarrow i} = \overrightarrow{0}\]
+											where \(\mathcal{N}(i)\) denotes the set of direct neighbors of node \(i\).
+										</p>
+
+										<p>
+											Our goal is thus to find the position of equilibrium of every node, given as an input the external forces and the network structure that defines the set of interacting particles.
+										</p>
+
+										<center><img src="images/gns_linear_system_article/small_graph.png" height="400" alt="" /></center>
+										
+
+										<p>
+											As described by the figure above, the inputs of our problem are the external forces and the line characteristics (stiffness, in the case of springs), and the outputs are the particles' positions of equilibrium. More interestingly, one can observe that not all particles are interacting: particles \(1\) and \(3\) for instance are not linked by a spring, although there is an indirect interaction through particle \(2\).
+										</p>
+
+										<p>
+											It is possible to solve separately the two dimensions of the problem (by linearity of the interaction forces), so we will limit ourselves to solving :
+										</p>
+
+										<p>
+											\[ \text{find  } (x_1, \dots, x_N) \in \mathbb{R}^N \text{  such that  }\forall i \in [1, N], F_{ext \rightarrow i} + \sum_{j \in \mathcal{N}(i)} k_{ij} (x_j - x_i) = 0 \]
+										</p>
+
+										<p>
+											In other words, find the position of every particle such that all of them will be at equilibrium at the same time. Let \(X = (x_1, \dots, x_N) \in \mathbb{R}^N\), \(B = (F_{ext \rightarrow 1}, \dots, F_{ext \rightarrow N})\), and \(A \in \mathbb{R}^{N\times N}\) a matrix such that :
+										</p>
+
+										<p>
+											\[A_{ij} = k_{ij} \text{      if  } i \neq j \text{  and there is an edge between }i\text{ and }j \]
+											\[A_{ij} = -\sum_{l\in \mathcal{N}(i)} k_{il} \text{      if  } i = j \]
+											\[A_{ij} = 0 \text{      if  } i \neq j \text{  and there is no edge between }i\text{ and }j  \]
+										</p>
+
+										<p>
+											We can thus rephrase our problem the following way :
+										</p>
+
+										<p>
+											\[ \text{find  } X \in \mathbb{R}^N \text{  such that  } AX+B=0\]
+										</p>
+
+
+
+									<h2>Classical approach</h2>
+
+										<p>
+											Indeed this is a very basic linear system. It can be solved by a simple matrix inversion. In our case, the matrix \(A\) is by construction a laplacian matrix, which means that it has at least one null eigenvalue. Assuming the graph is connected, there is only one null eigenvalue. In other words, there is an infinity of solutions to the equation \(AX+B=0\). Our problem is underconstrained, and one needs to remove of degree of freedom, so that there will be only one solution. The most common approach is thus to set \(x_1 = 0\), and to authorize node \(1\) to be out of equilibrium. The resulting system is described by
+										</p>
+
+										<p>
+											\[ \text{find  } X' \in \mathbb{R}^{N-1} \text{  such that  } A'X'+B'=0\]
+										</p>
+
+										<p>
+											where \(X' = (x_2, \dots, x_N)\), \(B' = (F_{ext \rightarrow 2}, \dots, F_{ext \rightarrow N})\), and \(A'\) is the result of deleting the first row and the first column from matrix \(A\). Now our system is sufficiently constrained (provided that the network is connected), and the inverse of matrix \(A'\) does exist and can be computed! The solution is thus provided by :
+										</p>
+
+										<p>
+											\[ X' = -A'^{-1}B\]
+										</p>
+
+										<p>
+											and one just needs to reintroduce the first component (which has been set to zero) to have a solution of the problem.
+										</p>
+
+										<p>
+											Although this method is quite straightforward, matrix inversions tend to scale in the cube of the amount of node in the network. Moreover, it can only solve linear systems, and more complex approaches such as Newton-Raphson are required for non-linear equations.
+										</p>
+
+
+									<h2>Graph Neural Solver</h2>
+
+										<h3>A short introduction to neural networks</h3>
+
+											<p>
+												Neural networks are a class of parametric functions that are used to model complex mappings between inputs and outputs. 
+											</p>
+
+
+										<h3>Exploiting the graphical structure of the problem</h3>
+
+										<h3>Graph Neural Solver architecture and method</h3>
+
+
+
+									<h2>Experiments</h2>
+
+										<h3>Dataset</h3>
+
+											<p>
+												The datasets used for training, validation and test have all been generated following the same process. We sampled 
+											</p>
+
+											<h4>Graph structure</h4>
+
+
+										<h3>Training</h3>
+
+											<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~balthazar/22.embed" height="525" width="100%"></iframe>
+
+										<h3>Test</h3>
+
+											<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~balthazar/17.embed" height="800" width="100%"></iframe>
+											damljdljzl
+
+											<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~balthazar/26.embed" height="800" width="100%"></iframe>
+									
+								</section>
+
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+					<div id="sidebar">
+						<div class="inner">
+
+							<!-- Section -->
+								<section>
+									<span class="image main"><img src="images/id_pic.png" alt="" /></span>
+									<header class="major">
+										<h2>Balthazar Donon</h2>
+									</header>
+									<p>PhD Student @ LRI & RTE<br>
+									Deep Learning for Power Systems</p>
+									<ul class="icons">
+										<li><a href="https://github.com/bdonon" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+										<li><a href="https://www.linkedin.com/in/balthazar-donon-912739111/" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
+										<li><a href="https://scholar.google.com/citations?user=7l4-5PEAAAAJ&hl=fr&oi=sra" class="icon solid fa-graduation-cap"><span class="label">GoogleScholar</span></a></li>
+									</ul>
+								</section>
+
+							<!-- Menu -->
+								<nav id="menu">
+									<header class="major">
+										<h2>Menu</h2>
+									</header>
+									<ul>
+										<li><a href="index.html">Homepage</a></li>
+										<li>
+											<span class="opener">Blog</span>
+											<ul>
+												<li><a href="gns.html">Graph Neural Solver for Power Systems</a></li>
+												<li><a href="leap.html">LEAP neural network</a></li>
+											</ul>
+										</li>
+										<li><a href="publications.html">Publications</a></li>
+										<li><a href="contact.html">Contact</a></li>
+									</ul>
+								</nav>
+
+
+							
+							<!-- Footer -->
+								<footer id="footer">
+									<span class="image main"><img src="images/logo.png" alt="" /></span>
+									<p class="copyright">&copy; 2019 Balthazar Donon. All rights reserved. Demo Images: <a href="https://unsplash.com">Unsplash</a>. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+								</footer>
+
+						</div>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
