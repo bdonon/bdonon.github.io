@@ -37,38 +37,40 @@
 										<h1>Introducing the Graph Neural Solver</h1>
 									</header>
 
+
+
 									<h2>Overview</h2>
 
 										<p>
-											In order to introduce our approach called "Graph Neural Solver", we will see how it works on a very simple and visual case : a linear system. This novel approach aims at solving a system of linear or non-linear equations that rely on a quite sparse graphical structure. Moreover, it relies on tools from the statistical learning domain, which implies that we will learn to solve a problem in a specific input domain, and lose the genericity of classical approaches. The present blog post aims at providing intuitions about the way it works, and the typical application setup of such an approach.
+											Many real-world problems rely on complex graphical structures: electricity transportation, roads, social interactions, finite-volume systems, etc. In each of these, we have a set of fundamental entities (nodes, or particles), who interact through fundamental interactions. Not every pair of nodes are directly interconnected, but they may be linked through some other nodes. One may want to develop a way to predict the behavior of these systems in order to control them. For instance, in the electricity transportation network, consumers and producers are interconnected through power lines. Depending on how much power is being inputed or outputed across the grid, and where, it can cause some congestion. In order to prevent it, people that manage the power transportation network, need to be able to accurately determine if there will be a congestion in the future, based on the consumption predictions. This means that they need a good model of the power grid.
 										</p>
 
 										<p>
-											One should keep in mind that using such a complex neural network algorithm is indeed a bit "overkill" for this task. As will be descibed hereafter, a simple matrix inversion provides a solution. However, our method shows its real interest when applied to much larger or more complex problems, and the following application only serves as an illustration. This approach has been developped during my first year of PhD at RTE and LRI (see <a href="https://hal.archives-ouvertes.fr/hal-02175989/">Graph Neural Solver for Power Systems</a> and <a href="https://hal.archives-ouvertes.fr/hal-02372741v1/">Neural Network for Power Flow: Graph Neural Solver</a>). Although this has been developped primarily to deal with power systems issues, I apply it to a more generic problem in the current post. 
+											We propose a novel approach to predict the solution of a system of linear or non-linear equations that rely on Graph Neural Networks. In this blog post, we will see how it works on a very simple and visual case : a linear system. 
+										
+											Using such a complex neural network algorithm is indeed a bit "overkill" for this task. As will be descibed hereafter, a simple matrix inversion provides a solution. However, our method shows its real interest when applied to much larger or more complex problems (non-linear in the case of power systems), and the following application only serves as an illustration. 
 										</p>
 
 										<p>
-											The code developped for this blog post is available on my GitHub, feel free to take a look. If you have any question or observation, write me at <a href="mailto:balthazar.donon@rte-france.com">balthazar.donon@rte-france.com</a>. 
+											This approach has been developped during my first year of PhD at RTE and LRI (see <a href="https://hal.archives-ouvertes.fr/hal-02175989/">Graph Neural Solver for Power Systems</a> and <a href="https://hal.archives-ouvertes.fr/hal-02372741v1/">Neural Network for Power Flow: Graph Neural Solver</a>).
 										</p>
+
+										<p>
+											The code developped for this blog post is available on <a href="https://github.com/bdonon/GraphNeuralSolver_LinearSystem">here</a>, feel free to take a look. If you have any question or observation, contact me at <a href="mailto:balthazar.donon@rte-france.com">balthazar.donon@rte-france.com</a>. For the sake of conciseness, I won't dive into every detail (theoretical or experimental), so if you feel something is not clear, or would deserve a better explaination, let me know!
+										</p>
+
+										<center><img src="images/gns_linear_system_article/index_cover.gif" loop=infinite alt="" /></center>
 
 									<h2>Problem definition</h2>
 
 										<p>
-											Many real-world problems rely on complex graphical structures: electricity transportation, roads, social interactions, finite-volume systems, etc. In each of these, we have a set of fundamental entities (nodes, or particles), who interact through fundamental interactions. Not every pair of nodes are directly interconnected, but they may be linked through some other nodes. One may want to develop a way to predict the behavior of these system in order to control them. For instance, in the electricity transportation network, consumers and producers are interconnected through power lines. Depending on how much power is being inputed or outputed in the grid, and where, it can cause some congestion. In order to prevent these events, people that manage the power transportation network, need to be able to accurately determine if there will be a congestion in the future, based on the consumption predictions. This means that they need a good model of the power grid.
-										</p>
-
-										<p>
-											Our proposed approach is a neural network architecture that exploits the graphical structure of the problem. It relies heavily on Graph Neural Networks ADD REF.
-										</p>
-
-										<p>
-											For now, let's focus on a quite simple problem : a set of interacting particles that move in a 2D plane, and that are linked through a set of springs. We have a set of \(N\) particles, each defined by its 2-dimensional coordinates \( \overrightarrow{x}_i = (x_i, y_i) \). Some particles are linked to others through a spring-like interaction.
+											For now, let's focus on a quite simple problem : a set of interacting particles that move in a 2D plane, and that are linked through a set of springs (with varying stiffnesses). We have a set of \(N\) particles, each defined by its 2-dimensional coordinates \( \overrightarrow{x}_i = (x_i, y_i) \). Some particles are linked to others through a spring-like interaction.
 										</p>
 
 										<center><img src="images/gns_linear_system_article/basic_interaction.png" height="200" alt="" /></center>
 
 										<p>
-											The forces have the following expressions: 
+											The forces are symmetrical and have the following expressions: 
 										</p>
 
 										<p>
@@ -83,14 +85,14 @@
 										</p>
 
 										<p>
-											Our goal is thus to find the position of equilibrium of every node, given as an input the external forces and the network structure that defines the set of interacting particles.
+											Our goal is thus to find the position of equilibrium of every node, given as an input the external forces and the network of springs that link particles.
 										</p>
 
 										<center><img src="images/gns_linear_system_article/small_graph.png" height="400" alt="" /></center>
 										
 
 										<p>
-											As described by the figure above, the inputs of our problem are the external forces and the line characteristics (stiffness, in the case of springs), and the outputs are the particles' positions of equilibrium. More interestingly, one can observe that not all particles are interacting: particles \(1\) and \(3\) for instance are not linked by a spring, although there is an indirect interaction through particle \(2\).
+											As described in the figure above, the inputs of our problem are the external forces and the line characteristics (stiffness, in the case of springs), and the outputs are the particles' positions of equilibrium. More interestingly, one can observe that not all particles are interacting: particles \(1\) and \(3\) for instance are not linked by a spring, although there is an indirect interaction through particle \(2\).
 										</p>
 
 										<p>
@@ -124,7 +126,7 @@
 									<h2>Classical approach</h2>
 
 										<p>
-											Indeed this is a very basic linear system. It can be solved by a simple matrix inversion. In our case, the matrix \(A\) is by construction a laplacian matrix, which means that it has at least one null eigenvalue. Assuming the graph is connected, there is only one null eigenvalue. In other words, there is an infinity of solutions to the equation \(AX+B=0\). Our problem is underconstrained, and one needs to remove of degree of freedom, so that there will be only one solution. The most common approach is thus to set \(x_1 = 0\), and to authorize node \(1\) to be out of equilibrium. The resulting system is described by
+											Indeed this is a very basic linear system. It can be solved by a matrix inversion. In our case, the matrix \(A\) is by construction a laplacian matrix, which means that it has at least one zero eigenvalue. Assuming the graph is connected, there is only one such eigenvalue. In other words, there is an infinity of solutions to the equation \(AX+B=0\). If you take any solution to this equation and apply any translation, it will remain a solution. Our problem is underconstrained, and one needs to remove one degree of freedom, so that there will be only one solution. The most common approach is thus to set \(x_1 = 0\), and to authorize node \(1\) to be out of equilibrium. The resulting system is described by
 										</p>
 
 										<p>
@@ -136,7 +138,7 @@
 										</p>
 
 										<p>
-											\[ X' = -A'^{-1}B\]
+											\[ X' = -A'^{-1}B'\]
 										</p>
 
 										<p>
@@ -144,47 +146,164 @@
 										</p>
 
 										<p>
-											Although this method is quite straightforward, matrix inversions tend to scale in the cube of the amount of node in the network. Moreover, it can only solve linear systems, and more complex approaches such as Newton-Raphson are required for non-linear equations.
+											Although this method is quite straightforward, matrix inversions tend to scale in the cube of the amount of nodes in the network. Moreover, it can only solve linear systems, and more complex approaches such as Newton-Raphson are required for non-linear equations.
 										</p>
 
 
 									<h2>Graph Neural Solver</h2>
 
-										<h3>A short introduction to neural networks</h3>
+										<p>
+											Now that we have seen the canonical approach to solving a linear system, let's introduce our (more exotic) Graph Neural Solver. It heavily relies on Graph Neural Networks.
+										</p>
+
+										<h3>Neural networks</h3>
 
 											<p>
-												Neural networks are a class of parametric functions that are used to model complex mappings between inputs and outputs. 
+												Neural networks are a class of parametric functions that are used for classification and regression tasks. One of the reasons they have become so popular in the past decade is that they are extremely expressive and are able to build abstract representation of complex data. For instance, one the major breakthrough of the recent years enabled by neural nets is image classification. Even though two pictures representing a cat can be extremely different, a convolutional neural network is able to detect the occurence of small fundamental patterns, to build an abstract representation of the picture.
+											</p>
+
+											<p>
+												The only properties that are worth keeping in mind for our problem, is that neural nets are just <b>parametric functions</b>. They are parameterized by a set of weights. The goal is to minimize a Loss function (for instance the distance between the prediction and the ground truth) by changing the weights of the neural networks. This process is performed on a training dataset (for which we have access to the ground truth), and if everything goes well we can perform predictions on a test dataset (for which we do not have the ground truth).
+											</p>
+
+											<p>
+												This blog post assumes some knowledge about neural networks functions, as well as the way they are trained. If you want to dive deeper into neural networks, I would personally recommend the book Deep Learning by A. Courville, I. Goodfellow and Y. Bengio, or the CS230 class from Stanford University. 
+											</p>
+
+											<p>
+												In the following, we will consider neural networks as small elementary learning blocks that are trained by stochastic gradient descent.
 											</p>
 
 
 										<h3>Exploiting the graphical structure of the problem</h3>
 
+											<p>
+												If we wanted to train a neural network to solve a system of linear equations, the most simple approach would be to use a fully connected neural network. However, it wouldn't respect one basic property of our problem : the ordering of inputs should not affect the prediction.
+											</p>
+
+											<p>
+												For instance if we switch the index of two particles, it does not change the problem we are trying to solve. One way of dealing with this property is to use Graph Neural Networks. They are a class of neural networks that take into account the graphical structure of the input so that the index ordering has no actual impact on the prediction.
+											</p>
+
+											<p>
+												If you wish to have more informations about this class of neural network architectures, I recommend taking a look at <a href="https://tkipf.github.io">Thomas Kipf's blog</a>.
+											</p>
+
+										<h3>Minimizing the violation of the target equation</h3>
+
+											<p>
+												One of the main novelty of our paper <a href="https://hal.archives-ouvertes.fr/hal-02372741v1/">Neural Network for Power Flow: Graph Neural Solver</a> was to learn in an unsupervised fashion. Instead of minimizing the distance between the prediction and the output of another solver (whether it be a matrix inversion in the linear case, or a Newton Raphson method in the non-linear case), we now directly minimize the violation of the target equation caused by the prediction.
+											</p>
+
+											<center><img src="images/gns_linear_system_article/unsupervised.png" height="400" alt="" /></center>
+
+											<p>
+												This allows to learn in a completely unsupervised fashion which may in some cases result in a significant gain in terms of computational speed. Moreover, our neural network architecture is no longer an imitation of a solver.
+											</p>
+
 										<h3>Graph Neural Solver architecture and method</h3>
 
+											<p>
+												To sum up the approach we are developping with the Graph Neural Solver : we want a neural network that is composed of <b>basic neural network learning blocks</b>, intricately laid out to respect the <b>graph structure</b> of the input data, and that minimize the <b>violation of the target equation</b> during training.
+											</p>
 
+											<p>
+												The inputs are :
+													<li>For each particle \(i\), an external force \(B_i\)</li>
+													<li>For each edge \(ij\), an origin \(i\), an extremity \(j\), and a stiffness \(a_{ij}\)</li>
+											</p>
+
+											<p>
+												The outputs are :
+													<li>For each particle \(i\), a position \(X_i\)</li>
+											</p>
+
+											<p>
+												The Graph Neural Solver architecture attributes to each particle a latent message \(H_i\), that is iteratively corrected in the following way:
+											</p>
+
+											<p>
+												\[ H_i^0 = (0, \dots, 0) \in \mathbb{R}^d \]
+												\[ H_i^{k+1} = H_i^{k} + L_{k}(H_i^{k}, \sum_{j\in \mathcal{N}(i)} \phi_{k}(H_i^{k}, H_j^{k}, a_{ij}), B_i) \]
+												\[ \hat{X}_i^{k} = H_i^k[0] \]
+											</p>
+
+											<p>
+												where \(L_k\) and \(\phi_k\) are trainable neural network blocks.
+											</p>
+
+											<p>
+												Basically, we initialize the latent message of each particle to a zero message. By the way, the dimension \(d\) of those messages are a hyperparameter of the architecture. We then update it, by gathering information from its direct neighbors (combined with the stiffness of each connection), and its own external force. The prediction \(\hat{X}_i^{k}\) is performed by taking only the first component of \(\hat{H}_i^{k}\). Indeed if we wanted to predict a 2D info for each particle, then we would use the first two components.
+												We iterate this correction process a finite number of times : \(K\), which is another hyperparameter of the architecture.
+											</p>
+
+											<p>
+												Since we have a different prediction after each correction update, it is possible to compute the violation of the target equation after each of these correction updates. We thus define \(loss_i^k\) to be the local violation of the target equation at particle \(i\), and after the correction update \(k\):
+											</p>
+
+											<p>
+												\[ loss_i^k = || B_i - \sum_{j\in \mathcal{N}(i)} k_{ij} (\hat{X}_j^{k} - \hat{X}_i^{k})||_2^2 \]
+											</p>
+
+											<p>
+												During training we thus use the following loss :
+											</p>
+
+											<p>
+												\[ Loss = \sum_{k=1}^K \gamma^{K-k} \left[ \frac{1}{N}\sum_{i}^N loss_i^k \right] \]
+											</p>
+
+											<p>
+												The term between brackets is simply the average over the whole network of the local losses. We then take a weighted sum of these losses across all the correction updates, by also giving a stronger emphasis to the last correction updates. \(\gamma\) is an hyperparameter of the training process.
+											</p>
 
 									<h2>Experiments</h2>
 
 										<h3>Dataset</h3>
 
 											<p>
-												The datasets used for training, validation and test have all been generated following the same process. We sampled 
+												The datasets used for training, validation and test have all been generated following the same process. The code I used is available <a href="https://github.com/bdonon/GraphNeuralSolver_LinearSystem">here</a>.
+												The train set is composed of 100,000 datapoints. Each datapoint is composed of a random connected network (15 vertices, 20 edges), with stiffnesses uniformly sampled betwen 0.1 and 1. Each external force is uniformly sampled between -1 and 1.
+												The graphs below consider the test set, which was never encountered during training.
 											</p>
-
-											<h4>Graph structure</h4>
 
 
 										<h3>Training</h3>
+
+											<p>
+												This instance of Graph Neural Solver has been trained on an NVIDIA GTX 960m during approximately 10 hours. I trained during 1,000,000 iterations with minibatches of 100 samples. The optimizer used is Adam with a learning rate of \(2 \times 10^{-3}\), and standard parameters from Tensorflow 1.14. The dicount factor \(\gamma\) is set to 0.95. There are \(K=15\) correction updates, the latent dimension is \(d=10\), and each neural network block has 3 hidden layers (with 10 hidden dimensions). the non linearity used is a leaky ReLU.
+											</p>
+
+											<p>
+												The learning curve is displayed below. The average loss after each correction updates is displayed. Indeed, the closer you are to the final correction, the lower the loss.
+											</p>
 
 											<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~balthazar/22.embed" height="525" width="100%"></iframe>
 
 										<h3>Test</h3>
 
+											<p>
+												In my opinion, animations are always the best way to understand what is going on. You can find below two animations that give you a good grasp at how it works and how well it performs on the tet set. Press the play buttons of each animation, and feel free to zoom in, select frames, etc.
+											</p>
+
+											<p>
+												In the first animation, we have in light grey the actual solution of one instance of the problem. This is the ground truth, but keep in mind that our GNS never tries to imitate the ground truth (since it directly penalizes the violation of the target equation during training). In black is shown the prediction of the current correction update. Indeed it starts at zero, and then slowly moves to reach its final prediction at \(K=15\). It manages to get really close to the ground truth (although if you zoom in, you may observe some discrepency).
+											</p>
+
 											<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~balthazar/17.embed" height="800" width="100%"></iframe>
-											damljdljzl
+											
+											<p>
+												In the second animation is displayed a scatter plot of the predictions versus ground truth. The colors are in log scale. Ideally, if our predictor was perfect, we would have every point reach the diagonal \(x=y\) at the last update, which would mean that every prediction is the same as the ground truth. Actually, we are not so far from that, and we end up with a correlation between prediction and ground truth of 0.999!
+											</p>
 
 											<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~balthazar/26.embed" height="800" width="100%"></iframe>
 									
+									<h2>Conclusion</h2>
+
+										<p>
+											We manage to build an alternative method for solving a system of springs. It relies on graph neural networks, and directly tries to minimize the violation of physical laws during training, which makes it a method completely independent from previous ones. However, this is a bit overkill for such a small and simple system. This was primarily developped to deal with power flow equations which are non linear, and that also rely on sparse graphical structures. More informations about this application setup can be found in my publications.
+										</p>
+										
 								</section>
 
 
@@ -220,7 +339,7 @@
 										<li>
 											<span class="opener">Blog</span>
 											<ul>
-												<li><a href="gns.html">Graph Neural Solver</a></li>
+												<li><a href="gns_linear_system_article.html">Graph Neural Solver</a></li>
 											</ul>
 										</li>
 										<li><a href="publications.html">Publications</a></li>
