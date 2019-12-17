@@ -146,24 +146,24 @@
 										</p>
 
 										<p>
-											Although this method is quite straightforward, matrix inversions tend to scale in the cube of the amount of nodes in the network. Moreover, it can only solve linear systems, and more complex approaches such as Newton-Raphson are required for non-linear equations.
+											Although this method is quite straightforward, matrix inversion algorithms tend to scale in the cube of the amount of nodes in the network. Moreover, it can only solve linear systems, and more complex approaches such as Newton-Raphson are required for non-linear equations.
 										</p>
 
 
 									<h2>Graph Neural Solver</h2>
 
 										<p>
-											Now that we have seen the canonical approach to solving a linear system, let's introduce our (more exotic) Graph Neural Solver. It heavily relies on Graph Neural Networks.
+											Now that we have seen the canonical approach to solving this linear system, let's introduce our (more exotic) Graph Neural Solver. It heavily relies on Graph Neural Networks.
 										</p>
 
 										<h3>Neural networks</h3>
 
 											<p>
-												Neural networks are a class of parametric functions that are used for classification and regression tasks. One of the reasons they have become so popular in the past decade is that they are extremely expressive and are able to build abstract representation of complex data. For instance, one the major breakthrough of the recent years enabled by neural nets is image classification. Even though two pictures representing a cat can be extremely different, a convolutional neural network is able to detect the occurence of small fundamental patterns, to build an abstract representation of the picture.
+												Neural networks are a class of parametric functions that are used for classification and regression tasks. One of the reasons they have become so popular in the past decade is that they are extremely expressive and are able to build abstract representations of complex data.
 											</p>
 
 											<p>
-												The only properties that are worth keeping in mind for our problem, is that neural nets are just <b>parametric functions</b>. They are parameterized by a set of weights. The goal is to minimize a Loss function (for instance the distance between the prediction and the ground truth) by changing the weights of the neural networks. This process is performed on a training dataset (for which we have access to the ground truth), and if everything goes well we can perform predictions on a test dataset (for which we do not have the ground truth).
+												The only piece of information that is worth keeping in mind for our problem, is that neural nets are just <b>parametric functions</b>. They are parameterized by a set of weights. The goal is to minimize a Loss function (for instance the distance between the prediction and the ground truth) by changing the weights of the neural networks. This process is performed on a training dataset (for which we have access to the ground truth), and if everything goes well we can perform predictions on a test dataset (for which we do not have the ground truth).
 											</p>
 
 											<p>
@@ -198,19 +198,19 @@
 											<center><img src="images/gns_linear_system_article/unsupervised.png" height="400" alt="" /></center>
 
 											<p>
-												This allows to learn in a completely unsupervised fashion which may in some cases result in a significant gain in terms of computational speed. Moreover, our neural network architecture is no longer an imitation of a solver.
+												This allows to learn in a completely unsupervised fashion which may in some cases result in a significant gain in terms of computational speed during training. Moreover, our neural network architecture is no longer an imitation of a solver.
 											</p>
 
 										<h3>Graph Neural Solver architecture and method</h3>
 
 											<p>
-												To sum up the approach we are developping with the Graph Neural Solver : we want a neural network that is composed of <b>basic neural network learning blocks</b>, intricately laid out to respect the <b>graph structure</b> of the input data, and that minimize the <b>violation of the target equation</b> during training.
+												To sum up the approach we are developping with the Graph Neural Solver : we want a neural network that is composed of <b>basic neural network learning blocks</b>, intricately laid out to respect the <b>graph structure</b> of the input data, and that minimizes the <b>violation of the target equation</b> during training.
 											</p>
 
 											<p>
 												The inputs are :
 													<li>For each particle \(i\), an external force \(B_i\)</li>
-													<li>For each edge \(ij\), an origin \(i\), an extremity \(j\), and a stiffness \(a_{ij}\)</li>
+													<li>For each edge \(ij\), an origin \(i\), an extremity \(j\), and a stiffness \(k_{ij}\)</li>
 											</p>
 
 											<p>
@@ -224,7 +224,7 @@
 
 											<p>
 												\[ H_i^0 = (0, \dots, 0) \in \mathbb{R}^d \]
-												\[ H_i^{k+1} = H_i^{k} + L_{k}(H_i^{k}, \sum_{j\in \mathcal{N}(i)} \phi_{k}(H_i^{k}, H_j^{k}, a_{ij}), B_i) \]
+												\[ H_i^{k+1} = H_i^{k} + L_{k}(H_i^{k}, \sum_{j\in \mathcal{N}(i)} \phi_{k}(H_i^{k}, H_j^{k}, k_{ij}), B_i) \]
 												\[ \hat{X}_i^{k} = H_i^k[0] \]
 											</p>
 
@@ -233,7 +233,7 @@
 											</p>
 
 											<p>
-												Basically, we initialize the latent message of each particle to a zero message. By the way, the dimension \(d\) of those messages are a hyperparameter of the architecture. We then update it, by gathering information from its direct neighbors (combined with the stiffness of each connection), and its own external force. The prediction \(\hat{X}_i^{k}\) is performed by taking only the first component of \(\hat{H}_i^{k}\). Indeed if we wanted to predict a 2D info for each particle, then we would use the first two components.
+												Basically, we initialize the latent message of each particle to a zero message. By the way, the dimension \(d\) of those messages are a hyperparameter of the architecture. We then update it, by gathering information from its direct neighbors (combined with the stiffness of each connection), and its own external force. The prediction \(\hat{X}_i^{k}\) is performed by taking only the first component of \(\hat{H}_i^{k}\). Indeed if we wanted to predict a 2D feature for each particle, then we would use the first two components.
 												We iterate this correction process a finite number of times : \(K\), which is another hyperparameter of the architecture.
 											</p>
 
@@ -242,7 +242,7 @@
 											</p>
 
 											<p>
-												\[ loss_i^k = || B_i - \sum_{j\in \mathcal{N}(i)} k_{ij} (\hat{X}_j^{k} - \hat{X}_i^{k})||_2^2 \]
+												\[ loss_i^k = || B_i + \sum_{j\in \mathcal{N}(i)} k_{ij} (\hat{X}_j^{k} - \hat{X}_i^{k})||_2^2 \]
 											</p>
 
 											<p>
@@ -271,11 +271,11 @@
 										<h3>Training</h3>
 
 											<p>
-												This instance of Graph Neural Solver has been trained on an NVIDIA GTX 960m during approximately 10 hours. I trained during 1,000,000 iterations with minibatches of 100 samples. The optimizer used is Adam with a learning rate of \(2 \times 10^{-3}\), and standard parameters from Tensorflow 1.14. The dicount factor \(\gamma\) is set to 0.95. There are \(K=15\) correction updates, the latent dimension is \(d=10\), and each neural network block has 3 hidden layers (with 10 hidden dimensions). the non linearity used is a leaky ReLU.
+												This instance of Graph Neural Solver has been trained on an NVIDIA GTX 960m during approximately 10 hours. I trained during 1,000,000 iterations with minibatches of 100 samples. The optimizer used is Adam with a learning rate of \(2 \times 10^{-3}\), and standard parameters from Tensorflow 1.14. The dicount factor \(\gamma\) is set to 0.95. There are \(K=15\) correction updates, the latent dimension is \(d=10\), and each neural network block has 3 hidden layers (with 10 hidden dimensions). The non linearity used is a leaky ReLU.
 											</p>
 
 											<p>
-												The learning curve is displayed below. The average loss after each correction updates is displayed. Indeed, the closer you are to the final correction, the lower the loss.
+												The learning curve is displayed below. The average loss after each correction update is displayed. Indeed, the closer you are to the final correction, the lower the loss.
 											</p>
 
 											<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="https://plot.ly/~balthazar/22.embed" height="525" width="100%"></iframe>
@@ -301,7 +301,7 @@
 									<h2>Conclusion</h2>
 
 										<p>
-											We manage to build an alternative method for solving a system of springs. It relies on graph neural networks, and directly tries to minimize the violation of physical laws during training, which makes it a method completely independent from previous ones. However, this is a bit overkill for such a small and simple system. This was primarily developped to deal with power flow equations which are non linear, and that also rely on sparse graphical structures. More informations about this application setup can be found in my publications.
+											We managed to build an alternative method for solving a system of springs. It relies on graph neural networks, and directly tries to minimize the violation of the target equation during training, which makes it a method that is completely independent from previous ones. However, this is a bit overkill for such a small and simple system. This was primarily developped to deal with power flow equations which are non linear, and that also rely on sparse graphical structures. More informations about this application setup can be found in my publications.
 										</p>
 										
 								</section>
