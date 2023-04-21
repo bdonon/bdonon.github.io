@@ -67,6 +67,10 @@ Skills
   * PyTorch
 * Languages
   * French native
-  * English fluent
-* Skill 3
+  * English fluen
+
+
+
+
+
 
