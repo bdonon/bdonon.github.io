@@ -10,50 +10,63 @@ redirect_from:
 {% include base_path %}
 
 Education
-======
-* B.S. in GitHub, GitHub University, 2012
-* M.S. in Jekyll, GitHub University, 2014
-* Ph.D in Version Control Theory, GitHub University, 2018 (expected)
+=========
+
+* MPSI, Lycée Henri IV, 2011-2012
+* PSI<sup>*</sup>, Lycée Louis-le-Grand, 2012-2013
+* Diplôme d'Ingénieur polytechnicien, Promotion X2013
+* MSc in "Energies of the XXI<sup>st</sup> Century, École polytechnique, 2016
+* MSc in Civil & Environmental Engineering, Stanford University, 2018
+* PhD in Computer Science, Université Paris-Saclay, 2022
 
 Work experience
-======
-* Summer 2015: Research Assistant
-  * Github University
-  * Duties included: Tagging issues
-  * Supervisor: Professor Git
+==============
 
-* Fall 2015: Research Assistant
-  * Github University
-  * Duties included: Merging pull requests
-  * Supervisor: Professor Hub
+* 2022-2024: Postdoctoral Researcher
+  * Université de Liège
+  * RTE Research & Development
+  * Graph Neural Networks & Reinforcement Learning for Power Systems Operation
+  * Supervisor: Professor Louis Wehenkel
+
+* 2018-2022: PhD Student
+  * Université Paris-Saclay
+  * RTE Research & Development
+  * Graph Neural Networks & Reinforcement Learning for Power Systems Operation
+  * Supervisor: Professor Isabelle Guyon, Professor Marc Schoenauer, Rémy Clément
+
+* 2019: Teaching Assistant
+  * Université Paris-Saclay
+  * Data Analytics
+  * Supervisor: Professor Isabelle Guyon
+
+* 2018: Research Assistant
+  * Stanford University
+  * Western Interconnection Data Analysis Project
+
+* 2017: Teaching Assistant
+  * Stanford University
+  * Data Analytics for Urban Systems
+  * Supervisor: Professor Ram Rajagopal
+
+* 2017: Teaching Assistant
+  * Stanford University
+  * Natural Ventilation
+  * Supervisor: Professor Catherine Gorlé
+
+* 2016: Research Assistant
+  * Stanford University
+  * Computational Fluid Dynamics
+  * Supervisor: Professor Catherine Gorlé
   
 Skills
 ======
-* Skill 1
-* Skill 2
-  * Sub-skill 2.1
-  * Sub-skill 2.2
-  * Sub-skill 2.3
+* Programming
+  * Python
+  * JAX
+  * TensorFlow
+  * PyTorch
+* Languages
+  * French native
+  * English fluent
 * Skill 3
 
-Publications
-======
-  <ul>{% for post in site.publications %}
-    {% include archive-single-cv.html %}
-  {% endfor %}</ul>
-  
-Talks
-======
-  <ul>{% for post in site.talks %}
-    {% include archive-single-talk-cv.html %}
-  {% endfor %}</ul>
-  
-Teaching
-======
-  <ul>{% for post in site.teaching %}
-    {% include archive-single-cv.html %}
-  {% endfor %}</ul>
-  
-Service and leadership
-======
-* Currently signed in to 43 different slack teams
