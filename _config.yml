@@ -82,12 +82,12 @@ analytics:
 author:
   name             : "Balthazar Donon, PhD"
   avatar           : "profile.jpg"
-  bio              : "Postdoctoral Researcher @ Institut Montefiore & RTE"
-  location         : "Paris - Liège"
+  bio              : "Research Officer @ RTE"
+  location         : "Paris"
   employer         :
   pubmed           : 
   googlescholar    : "https://scholar.google.com/citations?user=7l4-5PEAAAAJ&hl=fr&oi=ao"
-  email            : "balthazar.donon@uliege.be"
+  email            : "balthazar.donon@rte-france.com"
   researchgate     :  # example: "https://www.researchgate.net/profile/yourprofile"
   uri              :
   bitbucket        :
