@@ -5,6 +5,11 @@ permalink: /publications/
 author_profile: true
 ---
 
+2024
+====
+
+- Balthazar Donon, François Cubélier, Efthymios Karangelos, Louis Wehenkel, Laure Crochepierre, Camille Pache, Lucas Saludjian, Patrick Panciatici, *Topology-Aware Reinforcement Learning for Tertiary Voltage Control*, PSCC 2024 ([pdf](https://orbi.uliege.be/bitstream/2268/315490/1/PSCC24___Topology_aware_reinforcement_learning_for_tertiary_voltage_control__Compact_.pdf))
+
 2022
 ====
 
