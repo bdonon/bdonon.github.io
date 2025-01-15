@@ -22,6 +22,10 @@ Education
 Work experience
 ==============
 
+* 2024-now: Research Officer
+  * RTE Research & Development
+  * Graph Neural Networks for Real Life Power Systems Operation
+
 * 2022-2024: Postdoctoral Researcher
   * Université de Liège
   * RTE Research & Development
