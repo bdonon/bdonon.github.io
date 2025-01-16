@@ -11,14 +11,15 @@ redirect_from:
 Short Bio
 =========
 
-Balthazar Donon is a research officer at RTE (Réseau de Transport d'Électricité) Research & Development.
-He is designing an AI algorithm that will advise power grid operators on the best actions to take.
+I am a research officer at RTE (Réseau de Transport d'Électricité) Research & Development.
+I mainly work on designing an AI algorithm to advise power grid operators on the best actions.
 
-He graduated from the École polytechnique (X2013) and Stanford University (MSc in Civil & Environmental Engineering).
-He obtained a PhD in Computer Science at Université Paris-Saclay and RTE R&D under the supervision of Isabelle Guyon, Marc Schoenauer and Rémy Clément.
-He then worked as a postdoctoral researcher at Institut Montefiore (Université de Liège) with Louis Wehenkel.
+I graduated from the École polytechnique (X2013) and Stanford University (MSc in Civil & Environmental Engineering).
+I obtained a PhD in Computer Science at Université Paris-Saclay and RTE R&D under the supervision of Isabelle Guyon, Marc Schoenauer, and Rémy Clément.
+I then worked as a postdoctoral researcher at Institut Montefiore (Université de Liège) with Louis Wehenkel.
 
-He has a strong interest in the Energy domain and its environmental and societal implications, as well in Artificial Intelligence, more specifically Graph Neural Networks and Reinforcement Learning. He aims to develop novel artificial neural network algorithms targeted at real-life and real-time Power Systems applications.
+I have a strong interest in the Energy domain and its environmental and societal implications, as well as in Artificial Intelligence, more specifically, Graph Neural Networks.
+My focus is on real-life and real-time Power Systems applications.
 
 
 Selected Papers
